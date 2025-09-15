@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MERN Blogging App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        
+        .navbar {
+            background-color: var(--secondary-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--light-color) !important;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        .post-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .post-title {
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .comment-section {
+            background-color: var(--light-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .comment {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .comment-author {
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+        
+        .create-post-form {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        
+        .error-message {
+            background-color: #ffecec;
+            color: #e74c3c;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .success-message {
+            background-color: #e7f6ec;
+            color: #27ae60;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .post-content {
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        
+        .post-meta {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-blog me-2"></i>MERN Blog</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#create-post">Create Post</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#posts">View Posts</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold">Welcome to MERN Blog</h1>
+            <p class="lead">Share your thoughts, ideas, and stories with the world</p>
+            <a href="#create-post" class="btn btn-light btn-lg mt-3">Create Your First Post</a>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Create Post Form -->
+        <section id="create-post" class="create-post-form">
+            <h2 class="mb-4"><i class="fas fa-pencil-alt me-2"></i>Create New Post</h2>
+            <div id="create-post-message"></div>
+            <form id="post-form">
+                <div class="mb-3">
+                    <label for="postTitle" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="postTitle" required>
+                    <div class="form-text">Title must not be empty</div>
+                </div>
+                <div class="mb-3">
+                    <label for="postContent" class="form-label">Content</label>
+                    <textarea class="form-control" id="postContent" rows="5" required></textarea>
+                    <div class="form-text">Content must be at least 20 characters long</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Publish Post</button>
+            </form>
+        </section>
+
+        <!-- Posts Listing -->
+        <section id="posts" class="mb-5">
+            <h2 class="mb-4"><i class="fas fa-newspaper me-2"></i>Recent Posts</h2>
+            <div id="posts-container">
+                <div class="loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Post Detail Modal -->
+        <div class="modal fade" id="postDetailModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="postDetailTitle"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="post-meta mb-3">
+                            <span id="postDetailDate"></span>
+                        </div>
+                        <div class="post-content mb-4" id="postDetailContent"></div>
+                        
+                        <!-- Comments Section -->
+                        <div class="comment-section">
+                            <h5>Comments</h5>
+                            <div id="comments-container"></div>
+                            
+                            <!-- Add Comment Form -->
+                            <form id="comment-form" class="mt-4">
+                                <input type="hidden" id="commentPostId">
+                                <div class="mb-3">
+                                    <label for="commentAuthor" class="form-label">Your Name</label>
+                                    <input type="text" class="form-control" id="commentAuthor" placeholder="Optional">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="commentContent" class="form-label">Your Comment</label>
+                                    <textarea class="form-control" id="commentContent" rows="3" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add Comment</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <p>MERN Blogging App &copy; 2023. All rights reserved.</p>
+            <p class="mb-0">Built with MongoDB, Express.js, React, and Node.js</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // DOM Elements
+        const postsContainer = document.getElementById('posts-container');
+        const postForm = document.getElementById('post-form');
+        const createPostMessage = document.getElementById('create-post-message');
+        const commentForm = document.getElementById('comment-form');
+        const commentsContainer = document.getElementById('comments-container');
+        
+        // Modal Elements
+        const postDetailModal = new bootstrap.Modal(document.getElementById('postDetailModal'));
+        const postDetailTitle = document.getElementById('postDetailTitle');
+        const postDetailDate = document.getElementById('postDetailDate');
+        const postDetailContent = document.getElementById('postDetailContent');
+        const commentPostId = document.getElementById('commentPostId');
+        
+        // State
+        let posts = [];
+        let currentPostId = null;
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchPosts();
+            
+            // Set up form event listeners
+            postForm.addEventListener('submit', handlePostSubmit);
+            commentForm.addEventListener('submit', handleCommentSubmit);
+        });
+        
+        // Fetch all posts
+        async function fetchPosts() {
+            try {
+                // In a real app, this would be an API call to your backend
+                // For demo purposes, we're using localStorage
+                const postsData = localStorage.getItem('blogPosts');
+                
+                if (postsData) {
+                    posts = JSON.parse(postsData);
+                    renderPosts();
+                } else {
+                    // Add some sample data if none exists
+                    posts = [
+                        {
+                            id: '1',
+                            title: 'Getting Started with MERN Stack',
+                            content: 'The MERN stack is a popular JavaScript stack for building modern web applications. It consists of MongoDB, Express.js, React, and Node.js. This combination allows developers to build full-stack applications using only JavaScript.',
+                            createdAt: new Date('2023-06-15').toISOString(),
+                            comments: [
+                                {
+                                    id: '1',
+                                    author: 'Jane Doe',
+                                    content: 'Great introduction to the MERN stack!',
+                                    createdAt: new Date('2023-06-16').toISOString()
+                                },
+                                {
+                                    id: '2',
+                                    author: 'John Smith',
+                                    content: 'I\'ve been using MERN for a year now and it\'s been fantastic.',
+                                    createdAt: new Date('2023-06-17').toISOString()
+                                }
+                            ]
+                        },
+                        {
+                            id: '2',
+                            title: 'The Power of React Components',
+                            content: 'React components are the building blocks of React applications. They allow you to split the UI into independent, reusable pieces and think about each piece in isolation. This component-based architecture makes it easier to build and maintain complex user interfaces.',
+                            createdAt: new Date('2023-07-01').toISOString(),
+                            comments: [
+                                {
+                                    id: '3',
+                                    author: 'Alex Johnson',
+                                    content: 'Components have made my code so much more organized!',
+                                    createdAt: new Date('2023-07-03').toISOString()
+                                }
+                            ]
+                        }
+                    ];
+                    localStorage.setItem('blogPosts', JSON.stringify(posts));
+                    renderPosts();
+                }
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+                postsContainer.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Failed to load posts. Please try again later.
+                    </div>
+                `;
+            }
+        }
+        
+        // Render posts to the DOM
+        function renderPosts() {
+            if (posts.length === 0) {
+                postsContainer.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No posts yet. Be the first to create one!
+                    </div>
+                `;
+                return;
+            }
+            
+            postsContainer.innerHTML = posts.map(post => `
+                <div class="card post-card">
+                    <div class="card-body">
+                        <h3 class="post-title">${post.title}</h3>
+                        <p class="card-text">${post.content.substring(0, 100)}${post.content.length > 100 ? '...' : ''}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Posted on ${new Date(post.createdAt).toLocaleDateString()}</small>
+                            <div>
+                                <span class="badge bg-primary me-2">${post.comments ? post.comments.length : 0} Comments</span>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewPost('${post.id}')">Read More</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Handle post form submission
+        function handlePostSubmit(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('postTitle').value.trim();
+            const content = document.getElementById('postContent').value.trim();
+            
+            // Validation
+            if (!title) {
+                showMessage('Title is required', 'error');
+                return;
+            }
+            
+            if (content.length < 20) {
+                showMessage('Content must be at least 20 characters long', 'error');
+                return;
+            }
+            
+            // Create new post
+            const newPost = {
+                id: Date.now().toString(),
+                title,
+                content,
+                createdAt: new Date().toISOString(),
+                comments: []
+            };
+            
+            // Add to posts array
+            posts.unshift(newPost);
+            
+            // Save to localStorage
+            localStorage.setItem('blogPosts', JSON.stringify(posts));
+            
+            // Update UI
+            renderPosts();
+            
+            // Reset form and show success message
+            postForm.reset();
+            showMessage('Post published successfully!', 'success');
+            
+            // Scroll to posts section
+            document.getElementById('posts').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Handle comment form submission
+        function handleCommentSubmit(e) {
+            e.preventDefault();
+            
+            const author = document.getElementById('commentAuthor').value.trim() || 'Anonymous';
+            const content = document.getElementById('commentContent').value.trim();
+            
+            if (!content) {
+                alert('Comment content is required');
+                return;
+            }
+            
+            // Create new comment
+            const newComment = {
+                id: Date.now().toString(),
+                author,
+                content,
+                createdAt: new Date().toISOString()
+            };
+            
+            // Find the post and add the comment
+            const postIndex = posts.findIndex(post => post.id === currentPostId);
+            if (postIndex !== -1) {
+                if (!posts[postIndex].comments) {
+                    posts[postIndex].comments = [];
+                }
+                posts[postIndex].comments.push(newComment);
+                
+                // Save to localStorage
+                localStorage.setItem('blogPosts', JSON.stringify(posts));
+                
+                // Update comments display
+                renderComments(currentPostId);
+                
+                // Reset form
+                commentForm.reset();
+            }
+        }
+        
+        // View post details
+        function viewPost(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (!post) return;
+            
+            currentPostId = postId;
+            
+            // Set modal content
+            postDetailTitle.textContent = post.title;
+            postDetailDate.textContent = `Posted on ${new Date(post.createdAt).toLocaleDateString()}`;
+            postDetailContent.textContent = post.content;
+            commentPostId.value = postId;
+            
+            // Render comments
+            renderComments(postId);
+            
+            // Show modal
+            postDetailModal.show();
+        }
+        
+        // Render comments for a post
+        function renderComments(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (!post || !post.comments || post.comments.length === 0) {
+                commentsContainer.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No comments yet. Be the first to comment!
+                    </div>
+                `;
+                return;
+            }
+            
+            commentsContainer.innerHTML = post.comments.map(comment => `
+                <div class="comment">
+                    <div class="comment-author">${comment.author}</div>
+                    <div class="comment-content">${comment.content}</div>
+                    <small class="text-muted">${new Date(comment.createdAt).toLocaleDateString()}</small>
+                </div>
+            `).join('');
+        }
+        
+        // Show message
+        function showMessage(message, type) {
+            createPostMessage.innerHTML = `
+                <div class="${type === 'error' ? 'error-message' : 'success-message'}">
+                    <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'} me-2"></i>
+                    ${message}
+                </div>
+            `;
+            
+            // Clear message after 3 seconds
+            setTimeout(() => {
+                createPostMessage.innerHTML = '';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
